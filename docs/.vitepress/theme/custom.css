@@ -1,0 +1,308 @@
+/**
+ * LuoSS Documentation Custom Styles
+ */
+
+/* Root variables */
+:root {
+  --luoss-primary: #3eaf7c;
+  --luoss-primary-light: #4ab388;
+  --luoss-primary-dark: #2d9a6a;
+  --luoss-secondary: #2c3e50;
+  --luoss-accent: #42b983;
+  --luoss-warning: #e6a23c;
+  --luoss-danger: #f56c6c;
+  --luoss-info: #909399;
+  --luoss-success: #67c23a;
+}
+
+/* Custom container styles */
+.custom-container {
+  margin: 1rem 0;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+}
+
+.custom-container.tip {
+  background-color: var(--vp-c-tip-bg, rgba(62, 175, 124, 0.1));
+  border-left: 4px solid var(--luoss-primary);
+}
+
+.custom-container.warning {
+  background-color: var(--vp-c-warning-bg, rgba(230, 162, 60, 0.1));
+  border-left: 4px solid var(--luoss-warning);
+}
+
+.custom-container.danger {
+  background-color: var(--vp-c-danger-bg, rgba(245, 108, 108, 0.1));
+  border-left: 4px solid var(--luoss-danger);
+}
+
+.custom-container.info {
+  background-color: var(--vp-c-info-bg, rgba(144, 147, 153, 0.1));
+  border-left: 4px solid var(--luoss-info);
+}
+
+/* Enhanced table styles */
+.vp-doc table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  overflow-x: auto;
+  display: block;
+}
+
+.vp-doc th {
+  background-color: var(--vp-c-bg-soft);
+  font-weight: 600;
+  text-align: left;
+}
+
+.vp-doc th,
+.vp-doc td {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--vp-c-divider);
+}
+
+.vp-doc tr:nth-child(2n) {
+  background-color: var(--vp-c-bg-soft);
+}
+
+/* Code block enhancements */
+.vp-doc [class*='language-'] {
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.vp-doc [class*='language-'] code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.875rem;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  word-break: break-all !important;
+}
+
+/* Code block line numbers and overflow */
+.vp-doc div[class*='language-'] {
+  overflow-x: auto;
+}
+
+/* Ensure inline code also wraps properly */
+.vp-doc :not(pre) > code {
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+}
+
+/* API method badges */
+.api-method {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-right: 0.5rem;
+}
+
+.api-method.get {
+  background-color: #61affe;
+  color: white;
+}
+
+.api-method.post {
+  background-color: #49cc90;
+  color: white;
+}
+
+.api-method.put {
+  background-color: #fca130;
+  color: white;
+}
+
+.api-method.delete {
+  background-color: #f93e3e;
+  color: white;
+}
+
+.api-method.patch {
+  background-color: #50e3c2;
+  color: #1a1a1a;
+}
+
+/* Feature badge styles */
+.feature-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin: 0.25rem;
+}
+
+.feature-badge.stable {
+  background-color: rgba(103, 194, 58, 0.15);
+  color: #67c23a;
+  border: 1px solid rgba(103, 194, 58, 0.3);
+}
+
+.feature-badge.beta {
+  background-color: rgba(230, 162, 60, 0.15);
+  color: #e6a23c;
+  border: 1px solid rgba(230, 162, 60, 0.3);
+}
+
+.feature-badge.alpha {
+  background-color: rgba(245, 108, 108, 0.15);
+  color: #f56c6c;
+  border: 1px solid rgba(245, 108, 108, 0.3);
+}
+
+.feature-badge.experimental {
+  background-color: rgba(144, 147, 153, 0.15);
+  color: #909399;
+  border: 1px solid rgba(144, 147, 153, 0.3);
+}
+
+/* Version badge styles */
+.version-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  margin-left: 0.5rem;
+}
+
+/* Architecture diagram styles */
+.architecture-diagram {
+  background-color: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+}
+
+.architecture-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* API example card */
+.api-example {
+  background-color: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 1rem 0;
+}
+
+.api-example-header {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: var(--vp-c-bg);
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+
+.api-example-title {
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.api-example-body {
+  padding: 1rem;
+}
+
+/* Navigation highlight effect */
+.VPNavBarMenuLink:hover {
+  color: var(--luoss-primary);
+}
+
+.VPSidebarItem.is-active > .item > .link > .text {
+  color: var(--luoss-primary);
+}
+
+/* Hero customization */
+.VPHero .name {
+  background: linear-gradient(120deg, var(--luoss-primary), var(--luoss-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Feature grid enhancement - 3 columns layout */
+.VPFeatures .items {
+  display: grid !important;
+  gap: 1.5rem;
+  grid-template-columns: repeat(3, 1fr) !important;
+}
+
+/* Override VitePress grid-N classes that set fixed width */
+.VPFeatures .items .item {
+  width: 100% !important;
+  max-width: none !important;
+  flex: none !important;
+}
+
+.VPFeature {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 100%;
+}
+
+.VPFeature:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive: 2 columns on medium screens */
+@media (max-width: 960px) {
+  .VPFeatures .items {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Responsive: 1 column on mobile */
+@media (max-width: 640px) {
+  .VPFeatures .items {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Dark mode adjustments */
+.dark {
+  --luoss-primary: #4ab388;
+  --luoss-primary-light: #5cc496;
+  --luoss-primary-dark: #3eaf7c;
+}
+
+.dark .VPFeature:hover {
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .vp-doc table {
+    font-size: 0.875rem;
+  }
+
+  .api-example-header {
+    flex-wrap: wrap;
+  }
+}
+
+/* Print styles */
+@media print {
+  .VPNav,
+  .VPSidebar,
+  .VPFooter {
+    display: none;
+  }
+
+  .VPContent {
+    padding: 0;
+  }
+}

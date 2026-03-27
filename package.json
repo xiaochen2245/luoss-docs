@@ -1,0 +1,23 @@
+{
+  "name": "k8s-tenant-docs",
+  "version": "1.0.0",
+  "description": "K8s 租户管理平台文档",
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "keywords": [
+    "kubernetes",
+    "tenant",
+    "documentation"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "docx": "^9.6.0",
+    "mermaid": "^11.13.0",
+    "vitepress": "^1.6.4",
+    "vitepress-plugin-mermaid": "^2.0.17"
+  }
+}
