@@ -125,7 +125,7 @@ export default withMermaid(
 
       // Social links
       socialLinks: [
-        { icon: 'github', link: 'https://github.com' },
+        { icon: 'github', link: 'https://github.com/abcdqwerxsa/luoss-docs' },
       ],
 
       // Footer
@@ -146,7 +146,7 @@ export default withMermaid(
 
       // Edit link
       editLink: {
-        pattern: 'https://github.com/your-org/k8s-tenant-platform/edit/main/docs-site/docs/:path',
+        pattern: 'https://github.com/abcdqwerxsa/luoss-docs/edit/main/docs/:path',
         text: '在 GitHub 上编辑此页',
       },
 

@@ -52,4 +52,4 @@ features:
 
 - [常见问题](/guide/faq)
 - [故障排查](/admin/troubleshooting)
-- [GitHub Issues](https://github.com/your-org/k8s-tenant-platform/issues)
+- [GitHub Issues](https://github.com/abcdqwerxsa/luoss-docs/issues)
