@@ -21,7 +21,7 @@ export default withMermaid(
 
     // Sitemap
     sitemap: {
-      hostname: 'https://luoss.example.com',
+      hostname: 'https://luoss.nilpo.app',
       lastmodDateOnly: true,
     },
 
