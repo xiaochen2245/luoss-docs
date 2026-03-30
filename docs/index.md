@@ -4,7 +4,7 @@ layout: home
 hero:
   name: LuoSS
   text: 络书算衡
-  tagline: 企业级 Kubernetes 多租户管理平台
+  tagline: 企业级 Kubernetes 算力管理平台
   image:
     src: /logo.png
     alt: LuoSS Logo
