@@ -29,6 +29,7 @@
 |------|------|
 | 31617 | 前端 NodePort |
 | 31618 | 后端 NodePort |
+| 31619 | Grafana NodePort |
 | 5432 | PostgreSQL（内部） |
 
 ## 快速部署
@@ -38,22 +39,19 @@
 ```bash
 cd backend/deploy/helm/k8s-tenant-platform
 
-DEPLOY_POSTGRESQL=true \
-IMAGE_TAG=v5.0.1 \
-REGISTRY=docker.cnb.cool/nilpotenter/docker \
-./deploy.sh
+FRONTEND_TAG=v5.5.265 \
+BACKEND_TAG=v5.5.265 \
+./blue-green-deploy.sh full
 ```
 
 ### 带优先级调度部署
 
 ```bash
-DEPLOY_POSTGRESQL=true \
-IMAGE_TAG=v5.0.1 \
+FRONTEND_TAG=v5.5.265 \
+BACKEND_TAG=v5.5.265 \
 ENABLE_PRIORITY=true \
 ENABLE_VOLCANO=true \
-HIGH_PRIORITY_VALUE=2000000 \
-LOW_PRIORITY_VALUE=500 \
-./deploy.sh
+./blue-green-deploy.sh full
 ```
 
 ### 自定义配置
@@ -187,136 +185,6 @@ curl http://<node-ip>:31618/health
 
 # 前端访问
 curl http://<node-ip>:31617/
-```
-
-## 升级指南
-
-::: warning 重要
-**切勿使用 `helm uninstall`**，这会删除 PVC 导致数据丢失！
-:::
-
-### 升级前准备
-
-```bash
-# 1. 备份数据
-./backend/scripts/backup_postgresql.sh
-
-# 2. 检查当前版本
-helm list -n k8s-tenant
-
-# 3. 查看变更
-helm diff upgrade k8s-tenant-platform ./helm/k8s-tenant-platform -n k8s-tenant
-```
-
-### 执行升级
-
-```bash
-# 使用新镜像标签升级
-IMAGE_TAG=v5.0.2 ./deploy.sh
-
-# 或使用 helm upgrade
-helm upgrade k8s-tenant-platform ./helm/k8s-tenant-platform \
-  -n k8s-tenant \
-  --set backend.image.tag=v5.0.2
-```
-
-### 验证升级
-
-```bash
-# 检查 Pod 状态
-kubectl rollout status deployment/k8s-tenant-platform-backend -n k8s-tenant
-
-# 检查版本
-kubectl logs deployment/k8s-tenant-platform-backend -n k8s-tenant | grep -i version
-```
-
-## 灾备恢复
-
-### 数据备份
-
-```bash
-# 手动备份
-./backend/scripts/backup_postgresql.sh
-
-# 备份位置
-ls ./backups/
-# k8s_tenant_20260116_120000.sql.gz
-```
-
-### 定时备份
-
-```yaml
-# CronJob 示例
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: postgresql-backup
-  namespace: k8s-tenant
-spec:
-  schedule: "0 2 * * *"  # 每天凌晨 2 点
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          containers:
-            - name: backup
-              image: postgres:15-alpine
-              command:
-                - /bin/sh
-                - -c
-                - pg_dump -h postgresql -U postgres k8s_tenant | gzip > /backup/k8s_tenant_$(date +%Y%m%d_%H%M%S).sql.gz
-          restartPolicy: OnFailure
-```
-
-### 数据恢复
-
-```bash
-# 恢复数据
-./backend/scripts/restore_postgresql.sh ./backups/k8s_tenant_20260116_120000.sql.gz
-```
-
-## 监控配置
-
-### Prometheus 集成
-
-```yaml
-# values.yaml
-metrics:
-  enabled: true
-  serviceMonitor:
-    enabled: true
-    labels:
-      release: prometheus
-```
-
-### Grafana 仪表盘
-
-导入预置仪表盘：
-
-1. 登录 Grafana
-2. 导入仪表盘 JSON
-3. 配置数据源
-
-### 告警规则
-
-```yaml
-# PrometheusRule 示例
-apiVersion: monitoring.coreos.com/v1
-kind: PrometheusRule
-metadata:
-  name: luoss-alerts
-  namespace: k8s-tenant
-spec:
-  groups:
-    - name: luoss
-      rules:
-        - alert: HighErrorRate
-          expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.1
-          for: 5m
-          labels:
-            severity: warning
-          annotations:
-            summary: High error rate detected
 ```
 
 ## Ingress 配置
