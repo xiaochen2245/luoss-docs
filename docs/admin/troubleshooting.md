@@ -71,5 +71,4 @@ kubectl logs statefulset/k8s-tenant-postgresql -n k8s-tenant
 
 ## 相关链接
 
-- [部署安装](/admin/deployment)
 - [队列资源池](/admin/queue-pool)

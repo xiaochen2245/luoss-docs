@@ -58,7 +58,6 @@ const adminGuideOutline = [
   {
     title: '运维指南',
     items: [
-      { text: '部署安装', file: 'docs/admin/deployment.md' },
       { text: '故障排查', file: 'docs/admin/troubleshooting.md' },
     ],
   },

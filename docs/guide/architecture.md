@@ -297,5 +297,4 @@ affinity:
 ## 下一步
 
 - [安全指南](/guide/security)
-- [部署安装](/admin/deployment)
 - [用户管理](/admin/users)
