@@ -1,8 +1,6 @@
 # 快速开始
 
-本手册用于指导用户在调度平台上进行 **Ascend（昇腾）环境下的多节点****分布式****训练与推理任务**，涵盖：
-
-- 调度平台介绍
+本手册用于指导用户在调度平台上进行 ****Ascend（昇腾）环境下的多节点分布式训练与推理任务****，涵盖：
 
 - 基础环境配置
 
@@ -13,65 +11,6 @@
 - 基于VLLM-Ascned启动Qwen-3.5-1222B-A10B分布式推理实例
 
 - 常见问题排查
-
-# 调度平台介绍
-
-## 仪表盘
-
-查看超节点集群内各项资源使用情况以及属于自己的配额情况
-
-## 开发环境
-
-创建开发环境用于代码更改，开发环境启动后点击详情界面进入可以查看对应的密码
-
-![](images/1.png)
-
-## 训练任务
-
-用于启动单节点或者多节点训练与推理任务，在创造任务界面可以选择单Task和自定义两种模式，需要注意的是单Task启动的任务实际启用的是vcjob而使用自定义任务则是启动的acjob，两者的环境变量会有一些区别，这部分会在后面的环境配置部分详细介绍。
-
-参数名称前面带红色*号的为必填项，具体信息可以将光标悬停在？上进行查看
-
-![](images/2.png)
-
-如果希望进行多节点分布式的训练与推理，建议使用自定义任务模式，按需更改设置，例如我希望启动一个80卡的任务，使用如下配置
-
-![](images/3.png)
-
-![](images/4.png)
-
-对于固定的Master节点，副本数和最小成员数都被固定为1，使用添加Task按钮增加Worker节点，设置4副本数，从而总共使用npu数量为1*16+4*16=80。对于参数设置，上方仅作为参考，实际使用中按照需要更改。对于离线镜像部分，会在后续镜像存储部分介绍，如果希望使用在线镜像，选择国内能够访问的镜像地址即可，如果需要使用其它用户的镜像，需要其它用户提供对应的镜像地址和镜像名，这部分具体实践在后续的实例章节会介绍。
-
-训练任务启动后可以进入详情界面查看任务的日志输出是否正常，也可以进入终端界面进行简单调试，在进入终端按钮前面的选项中可以选择进入哪个pod的终端，终端界面中不要使用vi命令，会导致终端卡死。
-
-![](images/5.png)
-
-![](images/6.png)
-
-## 数据存储
-
-数据存储界面可以进行训练代码以及权重的上传，目前仅支持压缩包的形式进行上传，上传后会位于/models目录当中，可以通过训练任务中的终端验证路径是否正常
-
-![](images/7.png)
-
-![](images/8.png)
-
-## 镜像存储
-
-可以上传本地的镜像文件，上传后会自动完成导入，后续可以在启动训练任务部分勾选使用离线镜像后使用，如果电脑本地安装了docker-desktop或者其它可以使用docker的环境，可以使用凭证在本地将镜像上传到网站端，以及可以使用其它用户上传的镜像
-
-![](images/9.png)
-
-![](images/10.png)
-
-![](images/11.png)
-
-首先点击复制希望分享的镜像比如yolo_ddp，随后在地址前方加上仓库凭证中的仓库地址，具体的应用在后续的实例中
-
-```Plain
-docker pull user-demo1234/yolo_ddp:v1       #yolo_ddp复制
-10.1.30.201:31443/user-demo1234/yolo_ddp:v1 #最终分享的镜像地址
-```
 
 # 基础环境配置
 
@@ -93,7 +32,7 @@ export TOOLCHAIN_HOME=${ASCEND_TOOLKIT_HOME}/toolkit
 export ASCEND_HOME_PATH=${ASCEND_TOOLKIT_HOME}
 ```
 
-对于分布式训练和推理，在ascend平台会使用华为官方的hccl（集合通信库），hccl会根据环境变量自动进行通信域的搭建，我们主要使用的是基于root节点信息创建通信域，使用以下代码进行环境的自动初始化，可以加在自己的启动命令前面
+对于分布式训练和推理，在ascend平台会使用华为官方的hccl（集合通信库），hccl会根据环境变量自动进行通信域的搭建，我们主要使用的是基于root节点信息创建通信域，使用以下代码进行环境的自动初始化，可以加在自己的启动命令前面，****对于单节点多卡训练的话，不要使用这个命令进行环境变量的初始化****。
 
 ```Plain
 source /models/share/init_env.sh
@@ -155,6 +94,48 @@ bash /models/share/ultralytics-8.4.20/start.sh  #启动命令
 ![](images/16.png)
 
 ```Plain
-bash /models/share/MindSpeed-LLM/start.sh						#启动命令
-docker.cnb.cool/nilpotenter/docker/codeserver-mindspeed:v1.0.5	#镜像路径
+bash /models/share/MindSpeed-LLM/start.sh                        #启动命令
+docker.cnb.cool/nilpotenter/docker/codeserver-mindspeed:v1.0.5    #镜像路径
 ```
+
+# 基于VLLM-Ascned启动Qwen-3.5-122B-A10B分布式推理实例
+
+![](images/17.png)
+
+![](images/18.png)
+
+![](images/19.png)
+
+```Bash
+bash /models/share/Qwen3.5-122B-A10B/start_master.sh
+bash /models/share/Qwen3.5-122B-A10B/start_worker.sh
+10.1.30.201:31443/user-demo1234/qwen3.5:a10
+```
+
+当前启动这个推理任务采用的是DP=2，TP=8，PP=1的设置，可以按照需要进行更改，在开发环境中使用命令`vi /models/share/Qwen3.5-122B-A10B/start_master.sh`即可编辑里面的内容
+
+```Bash
+curl http://localhost:8010/v1/completions \  
+-H "Content-Type: application/json" \  
+-d '{	"prompt": "你是什么模型，你的参数量大小是多少，介绍一下你的功能",        
+		"path": "/path/to/model/Qwen3.5-35B-A3B/",        
+		"max_tokens": 100,        
+		"temperature": 0        }'    
+```
+
+上面这个代码用于发送请求进行测试，当前需要进入master节点的终端运行
+
+```Bash
+vllm bench serve \    
+--backend vllm \    
+--base-url http://localhost:8010 \    
+--model qwen3.5 \    
+--tokenizer /mnt/model/corlorlight_models/Qwen3.5-122B-A10B \    
+--dataset-name random \    
+--num-prompts 10 \    
+--request-rate inf \    
+--input-len 128 \    
+--output-len 256
+```
+
+上面这个是吞吐测试的代码，也需要进入master节点终端运行，如果是模型第一次推理会很慢，因为需要激活参数，所以测试的时候第一次的结果仅作为参考，后续进行的测试会是正常的性能情况
