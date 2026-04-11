@@ -61,6 +61,48 @@
 2. 创建默认 ResourceQuota
 3. 初始化用户存储 PVC
 
+### 调试节点 Linux 用户
+
+当启用调试节点功能后，创建用户时还会自动在指定的调试节点上创建同名的 Linux 系统用户，方便用户直接 SSH 登录节点进行调试开发。
+
+::: info 调试节点功能
+- 使用 SSH 密钥认证连接调试节点
+- 在所有配置的节点上并发创建用户（`useradd -m -s /bin/bash {username}`）
+- 创建失败不影响平台用户注册（非阻塞）
+- 管理员需预先配置 SSH 密钥 Secret
+:::
+
+#### 部署配置
+
+在 `values.yaml` 中配置调试节点：
+
+```yaml
+backend:
+  debugNode:
+    enabled: true
+    hosts:
+      - "10.1.30.43:22"
+      - "10.1.30.44:22"
+    sshUser: "root"
+    sshKeyPath: "/etc/ktp/ssh/id_rsa"
+```
+
+#### 创建 SSH 密钥 Secret
+
+```bash
+# 生成密钥对（如果还没有）
+ssh-keygen -t ed25519 -f /tmp/ktp-debug-node -N ""
+
+# 将公钥复制到调试节点
+ssh-copy-id -i /tmp/ktp-debug-node.pub root@10.1.30.43
+ssh-copy-id -i /tmp/ktp-debug-node.pub root@10.1.30.44
+
+# 创建 Kubernetes Secret
+kubectl create secret generic k8s-tenant-platform-debug-node-ssh \
+  --from-file=id_rsa=/tmp/ktp-debug-node \
+  -n k8s-tenant
+```
+
 ## 编辑用户
 
 ### 修改信息
