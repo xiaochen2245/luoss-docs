@@ -155,6 +155,75 @@ pytorch/pytorch:2.0-cuda12
 | `codercom/code-server` | Code Server | 在线 IDE |
 | `jupyter/base-notebook` | Jupyter Notebook | 数据科学环境 |
 
+## 昇腾 NPU 训练镜像制作
+
+### 架构要求
+
+昇腾 NPU 节点为华为鲲鹏 ARM 架构，镜像**必须**为 `linux/arm64`：
+
+```bash
+# 构建 ARM64 镜像
+docker build --platform linux/arm64 -t my-training:v1 .
+```
+
+### 镜像中不应包含的内容
+
+以下组件由平台自动挂载，**不要**打包到镜像中：
+
+| 组件 | 原因 |
+|------|------|
+| Ascend 驱动 (`Ascend-driver-*`) | 通过 hostPath 从宿主机挂载 |
+| Ascend 工具包 (`ascend-toolkit`) | 通过 hostPath 从宿主机挂载 |
+| NPU 管理工具 | 通过 `/usr/local/sbin` 挂载 |
+
+### 推荐基础镜像
+
+| 镜像 | 适用场景 |
+|------|----------|
+| `torch:b030` | 华为官方 PyTorch 训练镜像（推荐） |
+| `mindspore:` | 华为官方 MindSpore 训练镜像 |
+
+### 自定义镜像 Dockerfile
+
+```dockerfile
+# 基于 ARM64 架构
+FROM --platform=linux/arm64 ubuntu:22.04
+
+# 安装 Python 和依赖
+RUN apt-get update && apt-get install -y \
+    python3 python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# 安装训练框架（不安装驱动）
+RUN pip3 install --no-cache-dir torch torchvision
+
+# 复制训练代码
+WORKDIR /job
+COPY . .
+
+# 启动命令（也可在平台创建任务时指定）
+CMD ["python3", "train.py"]
+```
+
+### 镜像构建和推送
+
+```bash
+# 构建 ARM64 镜像（在 ARM 机器上）
+docker build --platform linux/arm64 -t <registry>/<username>/my-training:v1 .
+
+# 或在 x86 机器上使用 buildx 跨平台构建
+docker buildx build --platform linux/arm64 -t <registry>/<username>/my-training:v1 --push .
+
+# 推送到仓库
+docker push <registry>/<username>/my-training:v1
+```
+
+::: warning 常见错误
+- **`exec format error`**：镜像架构不对，需要 `linux/arm64`
+- **驱动冲突**：镜像内安装了 Ascend 驱动，与宿主机驱动版本不兼容
+- **`LD_LIBRARY_PATH` 被覆盖**：镜像中设置了 `LD_LIBRARY_PATH` 但未保留 Ascend 驱动路径
+:::
+
 ## 镜像管理最佳实践
 
 ### 镜像命名规范
