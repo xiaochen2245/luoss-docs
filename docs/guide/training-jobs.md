@@ -198,63 +198,120 @@ if __name__ == '__main__':
 
 ## 断点续训（Fault Tolerance）
 
-断点续训功能可在训练任务异常中断后自动恢复，避免从头开始训练。
+断点续训功能可在训练任务异常中断后自动恢复训练，避免从头开始。平台基于华为 MindCluster 断点续训特性，支持故障检测、故障处理和训练恢复三个阶段。
 
 <FeatureBadge status="stable" />
 
-### 单机训练（vcjob）
+### 单机训练（vcjob）— 简单断点续训
 
-单机训练任务支持简单断点续训配置：
+单机训练任务使用 Volcano Job 调度，支持基于 Volcano 重调度策略的简单断点续训：
 
-| 参数 | 说明 | 可选值 |
-|------|------|--------|
-| **故障调度策略** | Pod 被驱逐时的处理方式 | `force`（强制重启）、`grace`（优雅重启）、`off`（关闭） |
-| **最大重试次数** | 任务失败后的最大重试次数 | 默认 3 次 |
-| **优雅终止等待时间** | grace 模式下 Pod 优雅退出的等待秒数 | 默认 900 秒 |
+| 参数 | 说明 | 可选值 | 默认值 |
+|------|------|--------|--------|
+| **故障调度策略** | Pod 被驱逐时的处理方式 | `force`、`grace`、`off` | `force` |
+| **最大重试次数** | 任务失败后的最大重试次数 | 正整数 | 3 |
+| **优雅终止等待时间** | grace 模式下 Pod 优雅退出的等待秒数 | 正整数（秒） | 900 |
 
-::: tip 故障调度策略说明
-- **force**：Pod 被驱逐时立即重启整个任务，适合无状态训练
-- **grace**：Pod 被驱逐时优雅等待当前 checkpoint 保存完成后再重启，适合需要保存进度的长时训练
-- **off**：不启用断点续训
+#### 故障调度策略说明
+
+| 策略 | 行为 | 适用场景 |
+|------|------|----------|
+| **force** | Pod 被驱逐时立即重启整个任务（`fault-scheduling: force`） | 短时训练、无状态训练 |
+| **grace** | Pod 被驱逐时优雅等待当前操作完成后再重启（`fault-scheduling: grace`），配合 `terminationGracePeriodSeconds` 使用 | 需要保存 checkpoint 的长时训练 |
+| **off** | 不启用断点续训 | 不需要自动恢复的训练 |
+
+#### 工作原理
+
+1. Volcano 监控 Pod 状态，当检测到 Pod 被驱逐（`PodEvicted` 事件）
+2. 根据 `fault-scheduling` 策略决定处理方式
+3. 重启任务，训练容器重新启动
+4. 训练代码从上次保存的 checkpoint 恢复训练
+
+#### 训练代码要求
+
+```python
+# 1. 定期保存 checkpoint（每个 epoch 或每 N 步）
+def save_checkpoint(model, optimizer, epoch, step, path='/models/checkpoints'):
+    torch.save({
+        'epoch': epoch,
+        'step': step,
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+    }, os.path.join(path, f'ckpt_{epoch}_{step}.pt'))
+
+# 2. 启动时自动从最新 checkpoint 恢复
+def load_latest_checkpoint(model, optimizer, path='/models/checkpoints'):
+    ckpts = sorted(glob.glob(os.path.join(path, 'ckpt_*.pt')))
+    if ckpts:
+        ckpt = torch.load(ckpts[-1])
+        model.load_state_dict(ckpt['model_state_dict'])
+        optimizer.load_state_dict(ckpt['optimizer_state_dict'])
+        return ckpt['epoch'], ckpt['step']
+    return 0, 0
+```
+
+::: warning 重要
+断点续训能自动重启任务，但**训练代码必须实现 checkpoint 保存和恢复逻辑**，否则重启后训练会从头开始。
 :::
 
-### 分布式训练（acjob）
+### 分布式训练（acjob）— 完整断点续训
 
-分布式训练（Ascend Job）支持完整的断点续训功能：
+分布式训练使用 Ascend Job 调度，支持完整的 MindCluster 断点续训特性，包括故障检测、自动隔离和训练恢复。
 
 #### 简单模式
 
-| 参数 | 说明 |
-|------|------|
-| **故障调度策略** | force / grace |
-| **最大重试次数** | 任务失败后最大重试次数 |
-| **恢复策略** | 训练恢复策略（详见下方说明） |
+| 参数 | 说明 | 可选值 |
+|------|------|--------|
+| **故障调度策略** | Pod 被驱逐时的处理方式 | `force`、`grace` |
+| **最大重试次数** | 任务失败后最大重试次数 | 正整数 |
+| **恢复策略（recover-strategy）** | 训练恢复策略 | 详见下方 |
 
 #### 恢复策略
 
-| 策略 | 说明 |
-|------|------|
-| `observer` | 观察模式，仅记录故障 |
-| `restart-task` | 重启整个任务 |
-| `restart-replace` | 替换故障 Pod 并恢复训练 |
-| `elastic-training` | 弹性训练，自动调整训练规模 |
-| `dump-restart` | 转储后重启 |
-| `exit` | 直接退出 |
+| 策略 | 说明 | 适用场景 |
+|------|------|----------|
+| `observer` | 观察模式，仅记录故障信息不自动恢复 | 调试阶段 |
+| `restart-task` | 重启整个任务，所有 Pod 重新创建 | 单节点或简单分布式 |
+| `restart-replace` | 仅替换故障 Pod，其他 Pod 保持运行 | 多节点分布式训练 |
+| `elastic-training` | 弹性训练，根据可用资源自动调整训练规模 | 大规模弹性训练 |
+| `dump-restart` | 先保存故障现场（临终 checkpoint），再重启恢复 | 需要保留故障现场的场景 |
+| `exit` | 直接退出不恢复 | 需要人工介入排查的场景 |
 
 #### 高级模式
 
-高级模式支持额外的容错能力：
+高级模式支持更强的容错能力：
 
 | 参数 | 说明 |
 |------|------|
-| **MindIO TFT** | 启用 MindIO Transparent Fault Tolerance，加速故障恢复 |
-| **MindIO ACP** | 启用 MindIO Async Checkpoint Persistence，异步保存 checkpoint |
+| **MindIO TFT** | MindIO Transparent Fault Tolerance，在故障发生时自动生成临终 checkpoint，减少训练迭代损失 |
+| **MindIO ACP** | MindIO Async Checkpoint Persistence，异步保存 checkpoint 到持久化存储，降低 checkpoint 保存对训练性能的影响 |
 
-::: warning 断点续训前提条件
-断点续训需要训练代码配合，确保：
-1. 训练代码支持 **定期保存 checkpoint**（模型参数、优化器状态、epoch 等完整状态）
-2. 训练代码支持 **从 checkpoint 恢复**，能正确加载并继续训练
-3. checkpoint 保存在持久化存储路径（如 `/models/checkpoints`）
+#### TaskD 进程级恢复（可选）
+
+对于需要进程级故障恢复的场景，训练代码需要集成 TaskD SDK。TaskD 是 MindCluster 提供的训练进程管理组件，支持：
+
+- 训练进程健康监测
+- 进程级故障检测和恢复
+- 与 ClusterD 通信协调故障恢复
+
+```python
+# TaskD 集成示例（需要在镜像中安装 taskd 包）
+import taskd
+
+# 初始化 TaskD Worker
+taskd.init_taskd_worker(rank_id=rank_id, framework="pt")
+
+# 启动 TaskD Worker
+taskd.start_taskd_worker()
+
+# 训练结束后销毁
+taskd.destroy_taskd_worker()
+```
+
+::: warning TaskD 使用前提
+1. 镜像中需要安装 `taskd` Python 包（包含在官方昇腾训练镜像中）
+2. 集群需要部署 ClusterD 和 TaskD 组件
+3. 训练代码需要按 TaskD API 规范集成
 :::
 
 ## 测试版本
@@ -265,19 +322,37 @@ if __name__ == '__main__':
 bash /models/share/scripts/train_start.sh /models /models/output main.py
 ```
 
-该脚本由华为 MindCluster 提供，内置以下功能：
-- 自动检测 NPU 设备和训练环境
-- 自动生成分布式训练配置（rank table 等）
-- 支持断点续训的自动恢复
-- 训练日志和错误信息收集
+### 脚本参数说明
+
+| 参数 | 说明 | 示例 |
+|------|------|------|
+| 第 1 个参数 | 代码目录路径 | `/models` |
+| 第 2 个参数 | 输出目录路径 | `/models/output` |
+| 第 3 个参数 | 启动脚本文件名 | `main.py` |
+| 剩余参数 | 传递给训练脚本的参数 | `--epochs 100` |
+
+### 脚本内置功能
+
+该脚本由华为 MindCluster 提供（位于 `/models/share/scripts/`），自动完成：
+
+| 功能 | 说明 |
+|------|------|
+| 环境初始化 | 自动 source Ascend toolkit 或 NNAE 环境变量 |
+| NPU 可用性检查 | 自动检测 NPU 设备是否空闲可用 |
+| HCCL 配置 | 自动读取 rank table 并配置分布式通信 |
+| 分布式环境变量 | 自动设置 `RANK`、`WORLD_SIZE`、`MASTER_ADDR` 等 |
+| 断点续训 | 设置 `RESUME_MODE_ENABLE=1` 启用断点续训模式 |
+| 多节点支持 | 自动识别节点数量，配置 `torch.distributed.run` 参数 |
 
 ::: tip 使用建议
-测试版本适用于快速验证 NPU 训练环境和脚本配置。生产训练建议根据实际需求编写自定义训练脚本。
+- **快速验证**：测试版本适用于快速验证 NPU 训练环境是否正常
+- **生产训练**：建议根据实际需求编写自定义训练脚本，参考测试版本脚本中的环境初始化逻辑
+- **自定义脚本**：如果使用自定义训练脚本，需要自行处理环境变量初始化和分布式配置
 :::
 
 ## 训练镜像制作要求
 
-使用昇腾 NPU 进行训练时，镜像需要满足以下要求：
+使用昇腾 NPU 进行训练时，镜像需要满足以下要求。
 
 ### 基础要求
 
@@ -285,60 +360,94 @@ bash /models/share/scripts/train_start.sh /models /models/output main.py
 |------|------|
 | **架构** | 必须为 `linux/arm64`（华为鲲鹏 ARM 架构） |
 | **基础镜像** | 推荐使用官方昇腾训练镜像（如 `torch:b030`） |
-| **驱动依赖** | 不得包含 Ascend 驱动，驱动通过 volume 从宿主机挂载 |
+| **驱动依赖** | **不要**在镜像中安装 Ascend 驱动，驱动通过 volume 从宿主机挂载 |
+| **Ascend Toolkit** | **不要**在镜像中安装 Ascend Toolkit，通过 volume 从宿主机挂载 |
 
 ### 自动挂载的宿主机目录
 
-训练 Pod 自动挂载以下宿主机目录，镜像中**不需要**安装这些组件：
+平台自动挂载以下宿主机目录到训练 Pod，**镜像中不需要**安装这些组件：
 
 | 容器路径 | 宿主机路径 | 说明 |
 |-----------|-----------|------|
-| `/usr/local/Ascend/driver` | `/usr/local/Ascend/driver` | Ascend 驱动 |
-| `/usr/local/Ascend/ascend-toolkit` | `/usr/local/Ascend/ascend-toolkit` | Ascend 工具包 |
-| `/usr/local/sbin` | `/usr/local/sbin` | 系统工具 |
+| `/usr/local/Ascend/driver` | `/usr/local/Ascend/driver` | Ascend 驱动（含 `npu-smi` 等管理工具） |
+| `/usr/local/Ascend/ascend-toolkit` | `/usr/local/Ascend/ascend-toolkit` | Ascend 工具包（含 `set_env.sh` 等环境脚本） |
 | `/usr/local/sbin` | `/usr/local/sbin` | NPU 管理工具 |
-| `/dev/shm` | Memory (16Gi) | 共享内存 |
+| `/dev/shm` | Memory (16Gi) | 共享内存（分布式训练必需） |
 | `/var/log/npu` | `/var/log/npu` | NPU 日志 |
+| `/user/serverid/devindex/config` | ConfigMap | HCCL rank table 配置（自动生成） |
 
-### 环境变量
+### 自动注入的环境变量
 
-训练 Pod 自动注入以下环境变量：
+| 变量 | 说明 | 示例值 |
+|------|------|--------|
+| `ASCEND_VISIBLE_DEVICES` | 可见的 NPU 设备 ID（从 Pod annotation 读取） | `Ascend910-4,Ascend910-5` |
+| `LD_LIBRARY_PATH` | 包含 Ascend 驱动库路径 | `/usr/local/Ascend/driver/lib64/common:...` |
+| `framework` | 训练框架名称 | `PyTorch` |
+| `POD_UID` | Pod 唯一标识 | `abc123-def456...` |
+| `XDL_IP` | Pod 所在节点 IP | `10.1.30.36` |
 
-| 变量 | 说明 |
+### 镜像中必须安装的内容
+
+| 组件 | 说明 | 安装方式 |
+|------|------|----------|
+| **Python 3** | 训练脚本运行环境 | `apt-get install python3` |
+| **PyTorch** | 训练框架（或其他框架） | `pip install torch` |
+| **训练代码** | 用户的训练脚本 | COPY 到镜像中 |
+
+### 镜像中**不要**安装的内容
+
+| 组件 | 原因 |
 |------|------|
-| `ASCEND_VISIBLE_DEVICES` | 可见的 NPU 设备 ID |
-| `LD_LIBRARY_PATH` | 包含 Ascend 驱动库路径 |
-| `framework` | 训练框架名称（如 `PyTorch`） |
-| `POD_UID` | Pod 唯一标识 |
-| `XDL_IP` | Pod 所在节点 IP |
+| Ascend 驱动 (`Ascend-driver-*`) | 通过 hostPath 从宿主机挂载，镜像中安装会版本冲突 |
+| Ascend Toolkit (`ascend-toolkit`) | 通过 hostPath 从宿主机挂载 |
+| NPU 管理工具 (`npu-smi` 等) | 包含在驱动挂载中 |
+| `LD_LIBRARY_PATH` 覆盖 | 平台自动注入正确的库路径 |
 
-### 镜像 Dockerfile 示例
+### Dockerfile 示例
 
 ```dockerfile
-# 示例：构建 PyTorch + Ascend NPU 训练镜像
-FROM ubuntu:22.04
+# 基于 ARM64 架构
+FROM --platform=linux/arm64 ubuntu:22.04
 
-# 安装基础依赖
+# 安装 Python 和基础工具
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
 # 安装训练框架
-RUN pip3 install torch torchvision
+RUN pip3 install --no-cache-dir torch torchvision
 
-# 安装训练脚本到工作目录
+# 复制训练代码
 WORKDIR /job
 COPY train.py .
 
-# 注意：不需要安装 Ascend 驱动和工具包
-# 这些通过 volume 从宿主机自动挂载
+# 注意事项：
+# 1. 不要安装 Ascend 驱动 — 由平台通过 hostPath 挂载
+# 2. 不要设置 LD_LIBRARY_PATH — 由平台自动注入
+# 3. 不要安装 ascend-toolkit — 由平台通过 hostPath 挂载
+# 4. 架构必须是 linux/arm64
+
+CMD ["python3", "train.py"]
 ```
 
-::: warning 注意事项
-1. **不要**在镜像中安装 Ascend 驱动（`Ascend-driver-*`），驱动由平台通过 hostPath 挂载
-2. **不要**设置 `LD_LIBRARY_PATH` 指向 Ascend 驱动路径，平台会自动注入
-3. 镜像架构必须是 `linux/arm64`，否则无法在鲲鹏节点上运行
+### 构建和推送
+
+```bash
+# 在 ARM64 机器上构建
+docker build --platform linux/arm64 -t <registry>/<username>/my-training:v1 .
+
+# 推送到仓库
+docker push <registry>/<username>/my-training:v1
+```
+
+::: warning 常见错误
+| 错误 | 原因 | 解决 |
+|------|------|------|
+| `exec format error` | 镜像架构不是 `linux/arm64` | 使用 `--platform linux/arm64` 构建 |
+| 驱动冲突 | 镜像内安装了 Ascend 驱动 | 删除镜像中的驱动，使用宿主机挂载 |
+| `npu-smi: command not found` | 训练脚本需要 `npu-smi` 但镜像中没有 | 由驱动挂载提供，确保 `/usr/local/Ascend/driver` 路径正确 |
+| `LD_LIBRARY_PATH` 异常 | 镜像中覆盖了库路径 | 不设置 `LD_LIBRARY_PATH`，或追加而非覆盖 |
 :::
 
 ## Checkpoint 管理
