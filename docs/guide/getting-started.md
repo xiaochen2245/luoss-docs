@@ -188,6 +188,7 @@ Host luoss-env
 | 了解平台架构 | [系统架构](/guide/architecture) |
 | 管理SSH密钥 | [设置 > SSH公钥](/guide/settings#ssh-公钥管理) |
 | 遇到问题 | [常见问题](/guide/faq) |
+| 联系我们 | nilpo@qq.com |
 
 ## 快速参考
 
@@ -225,3 +226,20 @@ conda env list
 | Stopping | 停止中 |
 | Stopped | 已停止 |
 | Error | 错误 |
+
+## 遇到问题
+
+如遇到任何问题，请联系：**nilpo@qq.com**
+
+## 断点续训推荐镜像
+
+使用断点续训功能时，请根据训练框架选择对应镜像：
+
+| 框架 | 推荐镜像 |
+|------|----------|
+| MindSpore | `docker.cnb.cool/nilpotenter/docker/mindformers-dl:v1` |
+| PyTorch | `docker.cnb.cool/nilpotenter/docker/mindspeed-dl:v1` |
+
+::: tip 说明
+以上镜像已内置 TaskD、MindIO TTP 等断点续训组件，无需额外安装。详细了解断点续训功能请参考 [训练任务 > 断点续训](/guide/training-jobs#断点续训resumable-training)。
+:::
