@@ -242,6 +242,19 @@ if __name__ == '__main__':
 | MindIO ACP | — | ✅ |
 | reset-config ConfigMap 自动创建 | — | ✅ |
 
+### 断点续训推荐镜像
+
+使用断点续训功能时，请根据训练框架选择已内置 TaskD、MindIO TTP 等组件的镜像：
+
+| 框架 | 推荐镜像 |
+|------|----------|
+| MindSpore | `docker.cnb.cool/nilpotenter/docker/mindformers-dl:v1` |
+| PyTorch | `docker.cnb.cool/nilpotenter/docker/mindspeed-dl:v1` |
+
+::: tip 说明
+以上镜像已内置断点续训所需组件（TaskD、MindIO TTP、MindIO ACP），无需额外安装。如需自行构建镜像，请参考下方 [断点续训镜像要求](#断点续训镜像要求)。
+:::
+
 ---
 
 ### 单任务模式 — vcjob 断点续训
