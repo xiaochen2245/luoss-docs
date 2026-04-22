@@ -188,7 +188,7 @@ Host luoss-env
 | 了解平台架构 | [系统架构](/guide/architecture) |
 | 管理SSH密钥 | [设置 > SSH公钥](/guide/settings#ssh-公钥管理) |
 | 遇到问题 | [常见问题](/guide/faq) |
-| 联系我们 | chezmoi@nilpo.app |
+| 联系我们 | paul.jiang@lednets.com |
 
 ## 快速参考
 
@@ -229,7 +229,7 @@ conda env list
 
 ## 遇到问题
 
-如遇到任何问题，请联系：**chezmoi@nilpo.app**
+如遇到任何问题，请联系：**paul.jiang@lednets.com**
 
 ## 断点续训推荐镜像
 
