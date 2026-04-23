@@ -38,7 +38,10 @@
 
 ## 创建任务
 
-### 步骤
+训练任务可通过**前端界面**或 **`ktp` 命令行工具**创建。命令行工具支持 YAML 配置文件、模板管理、批量提交等高级特性，适合自动化场景。详见 [命令行工具 (ktp)](/guide/cli)。
+
+### 通过前端创建
+
 1. 点击 **创建任务** 按钮
 2. 填写基本信息：
 
@@ -951,7 +954,25 @@ A: 这表示您当前所有 Pending 和 Running 状态训练任务的 NPU 总和
 2. 减少新任务的 NPU 请求数量
 3. 联系管理员调整限制（`backend.trainingJob.userMaxActiveNPU`）
 
+## 命令行提交
+
+除了通过前端界面创建训练任务，还可以使用 `ktp` 命令行工具在开发环境中提交和管理训练任务。支持 YAML 配置文件、模板管理、批量提交、实时日志流等高级特性。
+
+```bash
+# 通过 YAML 配置提交任务
+ktp submit -f job.yaml
+
+# 通过命令行参数提交
+ktp submit --name my-training --image pytorch:2.1 --command "python train.py" --npu 8
+
+# 查看任务日志
+ktp logs <任务ID> --follow
+```
+
+详见 [命令行工具 (ktp)](/guide/cli) 完整文档。
+
 ## 相关文档
+- [命令行工具 (ktp)](/guide/cli)
 - [我的作业](/guide/volcano-jobs)
 - [Web 终端](/guide/web-terminal)
 - [使用统计](/guide/my-usage)

@@ -67,6 +67,7 @@ export default withMermaid(
               { text: '调度仪表盘', link: '/guide/scheduling-dashboard' },
               { text: '开发环境', link: '/guide/environments' },
               { text: '训练任务', link: '/guide/training-jobs' },
+              { text: '命令行工具 (ktp)', link: '/guide/cli' },
               { text: '项目管理', link: '/guide/projects' },
               { text: '集群拓扑', link: '/guide/cluster-topology' },
               { text: '数据存储', link: '/guide/model-manager' },

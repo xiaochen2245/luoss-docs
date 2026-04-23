@@ -122,9 +122,9 @@ Host luoss-env
 
 ## 创建训练任务
 
-训练任务用于执行单节点或多节点分布式训练/推理。
+训练任务用于执行单节点或多节点分布式训练/推理。可通过**前端界面**或开发环境中的 **`ktp` 命令行工具**创建。
 
-### 步骤
+### 通过前端创建
 
 1. 点击左侧菜单 **训练任务**
 2. 点击 **创建任务** 按钮
@@ -178,12 +178,33 @@ Host luoss-env
    - 历史任务统计
    - 资源利用率
 
+### 通过命令行创建
+
+开发环境预装了 `ktp` 命令行工具，SSH 连接后可直接使用：
+
+```bash
+# 通过 YAML 配置文件提交任务
+ktp submit -f job.yaml
+
+# 通过命令行参数提交
+ktp submit --name my-training --image pytorch:2.1 --command "python train.py" --npu 8
+
+# 查看任务列表
+ktp list
+
+# 查看实时日志
+ktp logs <任务ID> --follow
+```
+
+认证 token 在环境启动时自动注入，无需手动配置。详见 [命令行工具 (ktp)](/guide/cli)。
+
 ## 下一步
 
 | 想要... | 阅读... |
 |---------|---------|
 | 深入了解开发环境 | [开发环境详细指南](/guide/environments) |
 | 深入了解训练任务 | [训练任务详细指南](/guide/training-jobs) |
+| 使用命令行工具 | [命令行工具 (ktp)](/guide/cli) |
 | 学习分布式训练示例 | [快速开始教程](/quickstart/quickstart) |
 | 了解平台架构 | [系统架构](/guide/architecture) |
 | 管理SSH密钥 | [设置 > SSH公钥](/guide/settings#ssh-公钥管理) |

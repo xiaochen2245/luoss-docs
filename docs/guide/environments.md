@@ -381,7 +381,25 @@ eval "$(/root/miniconda3/bin/conda shell.bash hook)"
 - 不与他人共享 SSH 私钥
 - 定期更换 SSH 密钥
 
+## 命令行工具
+
+开发环境预装了 `ktp` 命令行工具，可在 SSH 连接后直接使用。通过命令行提交和管理训练任务、查看日志、监控状态等。
+
+```bash
+# 查看帮助
+ktp --help
+
+# 提交训练任务
+ktp submit -f job.yaml
+
+# 查看任务列表
+ktp list
+```
+
+认证 token 在环境启动时自动注入，无需手动配置。详见 [命令行工具 (ktp)](/guide/cli)。
+
 ## 相关文档
+- [命令行工具 (ktp)](/guide/cli)
 - [设置 - SSH 公钥管理](/guide/settings)
 - [集群拓扑](/guide/cluster-topology)
 - [数据存储](/guide/model-manager)
