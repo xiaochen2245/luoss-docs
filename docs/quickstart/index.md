@@ -4,7 +4,6 @@
 
 - [开发环境配置](./environment)
 - [环境变量配置](./environment#环境变量配置)
-- [基于 torchrun 启动 yolo 分布式训练实例](./yolo-training)
 - [基于 MindsSpeed LLM 启动 Qwen-2.5-7b 分布式训练实例](./mindspeed-training)
 - [基于 VLLM-Ascend 启动 Qwen-3.5-1222B-A10B 分布式推理实例](./vllm-inference)
 - [常见问题排查](./troubleshooting)
