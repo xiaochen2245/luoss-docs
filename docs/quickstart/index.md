@@ -47,6 +47,5 @@
 | 场景 | 推荐阅读 |
 |------|---------|
 | 首次使用 | [环境变量配置](./environment) |
-| YOLO 训练任务 | [yolo 分布式训练](./yolo-training) |
 | LLM 分布式训练 | [MindsSpeed LLM 训练](./mindspeed-training) |
 | 模型推理服务 | [VLLM 推理](./vllm-inference) |
