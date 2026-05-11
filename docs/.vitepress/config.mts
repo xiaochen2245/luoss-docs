@@ -132,7 +132,6 @@ export default withMermaid(
           {
             text: '训练实例',
             items: [
-              { text: 'YOLO 分布式训练', link: '/quickstart/yolo-training' },
               { text: 'MindsSpeed LLM 训练', link: '/quickstart/mindspeed-training' },
             ],
           },

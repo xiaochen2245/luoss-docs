@@ -17,7 +17,7 @@
 ```bash
 bash /models/share/Qwen3.5-122B-A10B/start_master.sh   # master 任务启动命令
 bash /models/share/Qwen3.5-122B-A10B/start_worker.sh   # worker 任务启动命令
-10.1.30.201:31443/user-demo1234/qwen:v1.0              # 镜像路径
+ccr.ccs.tencentyun.com/jett2245/vllm-ascend:qwen3_5-v0-a3              # 镜像路径
 ```
 
 ## 终端提交
