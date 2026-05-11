@@ -77,6 +77,7 @@ export default withMermaid(
               { text: '站内信通知', link: '/guide/notifications' },
               { text: 'Web 终端', link: '/guide/web-terminal' },
               { text: '模型接口', link: '/guide/openai-api' },
+              { text: 'Claude Code', link: '/guide/claude-code' },
               { text: '设置', link: '/guide/settings' },
             ],
           },
@@ -131,7 +132,6 @@ export default withMermaid(
           {
             text: '训练实例',
             items: [
-              { text: 'YOLO 分布式训练', link: '/quickstart/yolo-training' },
               { text: 'MindsSpeed LLM 训练', link: '/quickstart/mindspeed-training' },
             ],
           },
