@@ -15,7 +15,7 @@
 - 集群资源充足时，可以使用超出额度的算卡
 :::
 
-请使用**河套学院邮箱**发送邮件至 **paul.jiang@lednets.com**，邮件模板如下：
+请使用**河套学院邮箱**发送邮件至 **hpc@slai.edu.cn**，邮件模板如下：
 
 ```
 主题：平台账号申请 - [您的姓名]
@@ -239,7 +239,7 @@ ktp logs <任务ID> --follow
 | 了解平台架构 | [系统架构](/guide/architecture) |
 | 管理SSH密钥 | [设置 > SSH公钥](/guide/settings#ssh-公钥管理) |
 | 遇到问题 | [常见问题](/guide/faq) |
-| 联系我们 | paul.jiang@lednets.com |
+| 联系我们 | hpc@slai.edu.cn |
 
 ## 快速参考
 
@@ -280,7 +280,7 @@ conda env list
 
 ## 遇到问题
 
-如遇到任何问题，请联系：**paul.jiang@lednets.com**
+如遇到任何问题，请联系：**hpc@slai.edu.cn**
 
 ## 断点续训推荐镜像
 
