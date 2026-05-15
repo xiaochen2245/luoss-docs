@@ -31,15 +31,15 @@ npm install -g @anthropic-ai/claude-code
 
 ```bash
 # 设置 API 地址
-export ANTHROPIC_BASE_URL=http://10.1.30.201:32222
+export ANTHROPIC_BASE_URL=http://10.1.21.21:3000
 
-# 设置鉴权 Token（内网环境可设为 empty）
-export ANTHROPIC_AUTH_TOKEN="empty"
+# 设置鉴权 Token
+export ANTHROPIC_AUTH_TOKEN="sk-8odN4WAQkkaff1abSVjlmKq9S5gxnt1DPdTqiBIQPuCx0ZAw"
 
 # 设置默认模型
-export ANTHROPIC_DEFAULT_OPUS_MODEL="deepseek-v4"
-export ANTHROPIC_DEFAULT_SONNET_MODEL="deepseek-v4"
-export ANTHROPIC_DEFAULT_HAIKU_MODEL="deepseek-v4"
+export ANTHROPIC_DEFAULT_OPUS_MODEL="deepseek-v4-flash"
+export ANTHROPIC_DEFAULT_SONNET_MODEL="deepseek-v4-flash"
+export ANTHROPIC_DEFAULT_HAIKU_MODEL="glm-5.1"
 
 # 设置代码生成质量级别（可选：high, max）
 export CLAUDE_CODE_EFFORT_LEVEL=max
@@ -61,13 +61,13 @@ claude
 
 ## 可用模型
 
-| 模型 | 说明 | 适用场景 |
-| :--- | :--- | :--- |
-| `deepseek-v4-pro` | DeepSeek 最新一代大模型 | 复杂推理、代码生成 |
-| `deepseek-v4-flash` | 快速响应版本 | 日常对话、轻量级任务 |
+| 模型 ID | 提供方 | 说明 | 适用场景 |
+| :--- | :--- | :--- | :--- |
+| `deepseek-v4-flash` | DeepSeek | 快速响应版本 | 日常对话、轻量级任务 |
+| `glm-5.1` | 智谱 | 通用大模型 | 复杂推理、代码生成 |
 
 ## 常见问题
 
-- **连接失败**：请确认环境变量 `ANTHROPIC_BASE_URL` 设置正确，且网络可以访问 `10.1.30.201:32222`。
-- **模型不可用**：请检查平台大模型服务状态，或联系管理员确认模型部署情况。
-- **需要鉴权**：如果平台启用了鉴权，请在 `ANTHROPIC_AUTH_TOKEN` 中填入您的有效 Token。
+- **连接失败**：请确认环境变量 `ANTHROPIC_BASE_URL` 设置正确，且网络可以访问 `10.1.21.21:3000`。
+- **鉴权失败**：请确认 `ANTHROPIC_AUTH_TOKEN` 已设置为有效的 API Key。
+- **模型不可用**：请检查平台大模型服务状态，当前可用模型为 `deepseek-v4-flash` 和 `glm-5.1`。
